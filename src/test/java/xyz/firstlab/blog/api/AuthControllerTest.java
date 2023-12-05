@@ -9,11 +9,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.TestSecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -70,15 +73,23 @@ class AuthControllerTest {
 
         SignInRequest test = new SignInRequest("test", "1234");
 
-        mockMvc.perform(post("/api/auth/sign-in")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(test))
-                        .accept(MediaType.APPLICATION_JSON)
-                        .with(csrf().asHeader())
-                )
-                .andDo(MockMvcResultHandlers.print())
+        MockHttpSession session = new MockHttpSession();
+
+        ResultActions result = mockMvc.perform(post("/api/auth/sign-in")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(test))
+                .accept(MediaType.APPLICATION_JSON)
+                .session(session)
+                .with(csrf().asHeader())
+        );
+
+        assertThat(session.getAttribute("SPRING_SECURITY_CONTEXT")).isNotNull();
+
+        SecurityContext context = TestSecurityContextHolder.getContext();
+        assertThat(context.getAuthentication()).isNotNull();
+
+        result.andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk())
-                // TODO: Add 'X-XSRF-TOKEN' header in the document
                 .andDo(document(
                         "/api/auth/sign-in",
                         requestFields(
@@ -113,7 +124,6 @@ class AuthControllerTest {
                                 Matchers.matchesRegex("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z?$")
                         )
                 )
-                // TODO: Add 'X-XSRF-TOKEN' header in the document
                 .andDo(document(
                         "/api/auth/sign-up",
                         requestFields(

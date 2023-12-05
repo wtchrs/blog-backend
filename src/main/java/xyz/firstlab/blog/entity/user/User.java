@@ -2,8 +2,10 @@ package xyz.firstlab.blog.entity.user;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import xyz.firstlab.blog.entity.BaseEntity;
 import xyz.firstlab.blog.entity.comment.Comment;
 import xyz.firstlab.blog.entity.post.Post;
@@ -38,6 +40,8 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String authority;
 
+    private Boolean deleted;
+
     @OneToMany(mappedBy = "following")
     private List<Follow> followings = new ArrayList<>();
 
@@ -50,6 +54,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user")
     private List<Comment> comments = new ArrayList<>();
 
+    @Builder
     public User(String username, String password, String name, String blogName, String greeting) {
         this.username = username;
         this.password = password;
@@ -57,6 +62,21 @@ public class User extends BaseEntity {
         this.blogName = blogName;
         this.greeting = greeting;
         this.authority = "ROLE_USER";
+        this.deleted = false;
+    }
+
+    public void encodePassword(PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(this.password);
+    }
+
+    public void update(String name, String blogName, String greeting) {
+        this.name = name;
+        this.blogName = blogName;
+        this.greeting = greeting;
+    }
+
+    public void delete() {
+        this.deleted = true;
     }
 
 }

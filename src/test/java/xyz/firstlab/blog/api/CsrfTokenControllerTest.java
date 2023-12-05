@@ -40,6 +40,7 @@ class CsrfTokenControllerTest {
 
         mockMvc.perform(get("/api/csrf").requestAttr(CsrfToken.class.getName(), csrfToken))
                 .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk()) // Response status is 200 OK
                 .andExpectAll(
                         jsonPath("message").value("The 'XSRF-TOKEN' cookie contains new CSRF token value."),
                         cookie().exists("XSRF-TOKEN")

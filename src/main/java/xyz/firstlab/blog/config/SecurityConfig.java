@@ -2,6 +2,7 @@ package xyz.firstlab.blog.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,9 +23,13 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/csrf").permitAll()
                 .requestMatchers("/api/auth/sign-in").permitAll()
-                .requestMatchers("/api/auth/sign-up").permitAll()
                 .requestMatchers("/api/auth/sign-out").authenticated()
-                .anyRequest().authenticated());
+                .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/*").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/api/users/*").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/users/*").authenticated()
+                .anyRequest().authenticated()
+        );
 
         return http.build();
     }

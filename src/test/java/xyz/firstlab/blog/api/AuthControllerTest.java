@@ -15,7 +15,6 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.TestSecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -34,6 +33,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -59,6 +59,7 @@ class AuthControllerTest {
     void settingMockMvc(WebApplicationContext context, RestDocumentationContextProvider restDocumentation) {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
                 .apply(documentationConfiguration(restDocumentation))
+                .apply(springSecurity())
                 .build();
     }
 
@@ -73,53 +74,53 @@ class AuthControllerTest {
         MockHttpSession session = new MockHttpSession();
 
         ResultActions result = mockMvc.perform(post("/api/auth/sign-in")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(test))
-                .accept(MediaType.APPLICATION_JSON)
-                .session(session)
-                .with(csrf().asHeader())
-        );
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(test))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .session(session)
+                        .with(csrf().asHeader())
+                )
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk()); // Response status is 200 OK
 
         assertThat(session.getAttribute("SPRING_SECURITY_CONTEXT")).isNotNull();
 
-        SecurityContext context = TestSecurityContextHolder.getContext();
+        SecurityContext context = (SecurityContext) session.getAttribute("SPRING_SECURITY_CONTEXT");
         assertThat(context.getAuthentication()).isNotNull();
 
-        result.andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk()) // Response status is 200 OK
-                .andDo(document(
-                        "/api/auth/sign-in",
-                        requestFields(
-                                fieldWithPath("username").type(JsonFieldType.STRING).description("username"),
-                                fieldWithPath("password").type(JsonFieldType.STRING).description("password")
-                        ),
-                        responseFields(
-                                fieldWithPath("name").type(JsonFieldType.STRING)
-                                        .description("The displayed name of the signed-in user"),
-                                fieldWithPath("blogName").type(JsonFieldType.STRING)
-                                        .description("The blog name associated with the signed-in user")
-                        )
-                ));
+        result.andDo(document(
+                "/api/auth/sign-in",
+                requestFields(
+                        fieldWithPath("username").type(JsonFieldType.STRING).description("username"),
+                        fieldWithPath("password").type(JsonFieldType.STRING).description("password")
+                ),
+                responseFields(
+                        fieldWithPath("name").type(JsonFieldType.STRING)
+                                .description("The displayed name of the signed-in user"),
+                        fieldWithPath("blogName").type(JsonFieldType.STRING)
+                                .description("The blog name associated with the signed-in user")
+                )
+        ));
     }
 
     @Test
     @WithMockUser(username = "test")
     void signOutShouldRemoveSessionInformation() throws Exception {
-        ResultActions result = mockMvc.perform(post("/api/auth/sign-out").with(csrf().asHeader()));
+        ResultActions result = mockMvc.perform(post("/api/auth/sign-out").with(csrf().asHeader()))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isOk()); // Response status is 200 OK
 
         MvcResult mvcResult = result.andReturn();
         HttpSession session = mvcResult.getRequest().getSession(false);
         assertThat(session).isNull();
 
-        result.andDo(MockMvcResultHandlers.print())
-                .andExpect(status().isOk()) // Response status is 200 OK
-                .andDo(document(
-                        "/api/auth/sign-out",
-                        responseFields(
-                                fieldWithPath("message").type(JsonFieldType.STRING)
-                                        .description("A constant message of \"Successfully signed out.\"")
-                        )
-                ));
+        result.andDo(document(
+                "/api/auth/sign-out",
+                responseFields(
+                        fieldWithPath("message").type(JsonFieldType.STRING)
+                                .description("A constant message of \"Successfully signed out.\"")
+                )
+        ));
     }
 
 }

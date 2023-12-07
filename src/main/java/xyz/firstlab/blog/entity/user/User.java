@@ -40,7 +40,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String authority;
 
-    private Boolean deleted;
+    private boolean deleted;
 
     @OneToMany(mappedBy = "following")
     private List<Follow> followings = new ArrayList<>();

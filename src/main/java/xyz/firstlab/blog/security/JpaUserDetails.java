@@ -36,7 +36,7 @@ public class JpaUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return !user.getDeleted();
+        return !user.isDeleted();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class JpaUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return !user.getDeleted();
+        return !user.isDeleted();
     }
 
 }

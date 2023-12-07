@@ -53,7 +53,7 @@ public class UserService {
         }
 
         User user = optional.get();
-        if (user.getDeleted()) {
+        if (user.isDeleted()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User '" + username + "' is not exists.");
         }
 

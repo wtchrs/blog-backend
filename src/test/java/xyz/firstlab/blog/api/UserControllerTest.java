@@ -162,7 +162,7 @@ class UserControllerTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk()); // Response status is 200 OK
 
-        assertThat(user.getDeleted()).isTrue();
+        assertThat(user.isDeleted()).isTrue();
 
         result.andDo(document(
                 "/api/users/{username} - DELETE",

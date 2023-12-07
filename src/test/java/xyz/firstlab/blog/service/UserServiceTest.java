@@ -68,12 +68,12 @@ class UserServiceTest {
 
     @Test
     void getUser_Successful() {
-        User mockUser = createMockUser();
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(mockUser));
+        User testUser = createTestUser();
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(testUser));
 
         UserInfoResponse result = userService.getUserInfo("testUser");
 
-        assertUserInfoResponseEqualsUser(result, mockUser);
+        assertUserInfoResponseEqualsUser(result, testUser);
     }
 
     @Test
@@ -87,9 +87,9 @@ class UserServiceTest {
 
     @Test
     void getUser_DeletedUser() {
-        User mockUser = createMockUser();
-        mockUser.delete();
-        when(userRepository.findByUsername("deleted")).thenReturn(Optional.of(mockUser));
+        User testUser = createTestUser();
+        testUser.delete();
+        when(userRepository.findByUsername("deleted")).thenReturn(Optional.of(testUser));
 
         assertThatThrownBy(() -> userService.getUserInfo("deleted"))
                 .isExactlyInstanceOf(ResponseStatusException.class)
@@ -98,17 +98,17 @@ class UserServiceTest {
 
     @Test
     void update_Successful() {
-        User mockUser = createMockUser();
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(mockUser));
+        User testUser = createTestUser();
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(testUser));
         UserUpdateRequest update = new UserUpdateRequest("new name", "new blog name", "new greeting");
 
         UserInfoResponse result = userService.update("testUser", update);
 
-        assertThat(mockUser.getName()).isEqualTo(update.name());
-        assertThat(mockUser.getBlogName()).isEqualTo(update.blogName());
-        assertThat(mockUser.getGreeting()).isEqualTo(update.greeting());
+        assertThat(testUser.getName()).isEqualTo(update.name());
+        assertThat(testUser.getBlogName()).isEqualTo(update.blogName());
+        assertThat(testUser.getGreeting()).isEqualTo(update.greeting());
 
-        assertUserInfoResponseEqualsUser(result, mockUser);
+        assertUserInfoResponseEqualsUser(result, testUser);
     }
 
     @Test
@@ -124,16 +124,16 @@ class UserServiceTest {
 
     @Test
     void delete_Successful() {
-        User mockUser = createMockUser();
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(mockUser));
+        User testUser = createTestUser();
+        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(testUser));
 
         userService.delete("testUser");
 
-        assertThat(mockUser.getDeleted()).isTrue();
+        assertThat(testUser.isDeleted()).isTrue();
     }
 
     @Test
-    void delete_UserNotFound() {
+    void delete_UserNotExists() {
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userService.delete("testUser"))
@@ -141,7 +141,7 @@ class UserServiceTest {
                 .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
     }
 
-    private static User createMockUser() {
+    private static User createTestUser() {
         return User.builder()
                 .username("testUser")
                 .password("password")

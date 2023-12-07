@@ -2,6 +2,7 @@ package xyz.firstlab.blog.entity.post;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import xyz.firstlab.blog.entity.BaseEntity;
@@ -27,6 +28,11 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private String content;
 
+    @Column(nullable = false)
+    private int views;
+
+    private boolean deleted;
+
     @ManyToOne
     @JoinColumn(nullable = false, updatable = false)
     private User author;
@@ -34,10 +40,25 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post")
     private List<Comment> comments = new ArrayList<>();
 
+    @Builder
     public Post(String title, String content, User author) {
         this.title = title;
         this.content = content;
         this.author = author;
+        this.views = 0;
+    }
+
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
+    public void increaseViews() {
+        this.views++;
+    }
+
+    public void delete() {
+        this.deleted = true;
     }
 
 }

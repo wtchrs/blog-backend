@@ -12,9 +12,7 @@ import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -44,12 +42,6 @@ class UserControllerTest {
 
     @Autowired
     UserRepository userRepository;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
-    AuthenticationManager authenticationManager;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -100,7 +92,7 @@ class UserControllerTest {
     @Test
     @Transactional
     void getUserInfo() throws Exception {
-        User user = createMockUser();
+        User user = createTestUser();
         userRepository.save(user);
 
         mockMvc.perform(get("/api/users/{username}", "testUser"))
@@ -116,7 +108,7 @@ class UserControllerTest {
     @Test
     @Transactional
     void updateUser() throws Exception {
-        User user = createMockUser();
+        User user = createTestUser();
         userRepository.save(user);
         UserDetails userDetails = new JpaUserDetails(user);
 
@@ -151,7 +143,7 @@ class UserControllerTest {
     @Test
     @Transactional
     void deleteUser() throws Exception {
-        User user = createMockUser();
+        User user = createTestUser();
         userRepository.save(user);
         UserDetails userDetails = new JpaUserDetails(user);
 
@@ -189,7 +181,7 @@ class UserControllerTest {
         );
     }
 
-    private static User createMockUser() {
+    private static User createTestUser() {
         return User.builder()
                 .username("testUser")
                 .password("password")

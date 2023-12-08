@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -63,7 +64,8 @@ class PostServiceTest {
     @Test
     void readPost_Successful() {
         User testUser = createTestUser();
-        Post mockPost = createMockPost(testUser);
+        Post mockPost = Mockito.spy(createTestPost(testUser));
+        when(mockPost.getId()).thenReturn(10L);
 
         when(postRepository.findById(10L)).thenReturn(Optional.of(mockPost));
 
@@ -88,13 +90,14 @@ class PostServiceTest {
 
     @Test
     void updatePost_Successful() {
-        User testUser = createTestUser();
+        User testUser = Mockito.spy(createTestUser());
+        when(testUser.getId()).thenReturn(1L);
         Post testPost = createTestPost(testUser);
 
         when(postRepository.findById(10L)).thenReturn(Optional.of(testPost));
 
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest("new title", "new content");
-        PostInfoResponse result = postService.updatePost(10L, postUpdateRequest);
+        PostInfoResponse result = postService.updatePost(10L, testUser.getId(), postUpdateRequest);
 
         assertThat(testPost.getTitle()).isEqualTo(postUpdateRequest.title());
         assertThat(testPost.getContent()).isEqualTo(postUpdateRequest.content());
@@ -111,19 +114,20 @@ class PostServiceTest {
 
         PostUpdateRequest postUpdateRequest = new PostUpdateRequest("new title", "new content");
 
-        assertThatThrownBy(() -> postService.updatePost(10L, postUpdateRequest))
+        assertThatThrownBy(() -> postService.updatePost(10L, 1L, postUpdateRequest))
                 .isExactlyInstanceOf(ResponseStatusException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
     }
 
     @Test
     void deletePost_Successful() {
-        User testUser = createTestUser();
+        User testUser = Mockito.spy(createTestUser());
+        when(testUser.getId()).thenReturn(1L);
         Post testPost = createTestPost(testUser);
 
         when(postRepository.findById(10L)).thenReturn(Optional.of(testPost));
 
-        postService.deletePost(10L);
+        postService.deletePost(10L, testUser.getId());
 
         assertThat(testPost.isDeleted()).isTrue();
     }
@@ -132,18 +136,9 @@ class PostServiceTest {
     void deletePost_PostNotExists() {
         when(postRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> postService.deletePost(10L))
+        assertThatThrownBy(() -> postService.deletePost(10L, 1L))
                 .isExactlyInstanceOf(ResponseStatusException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.NOT_FOUND);
-    }
-
-    private static Post createMockPost(User user) {
-        Post mockPost = mock(Post.class);
-        when(mockPost.getId()).thenReturn(10L);
-        when(mockPost.getTitle()).thenReturn("test title");
-        when(mockPost.getContent()).thenReturn("This is content.");
-        when(mockPost.getAuthor()).thenReturn(user);
-        return mockPost;
     }
 
     private static Post createTestPost(User user) {

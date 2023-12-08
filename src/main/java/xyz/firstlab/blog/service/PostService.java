@@ -65,15 +65,25 @@ public class PostService {
     }
 
     @Transactional
-    public PostInfoResponse updatePost(Long postId, PostUpdateRequest postUpdateRequest) {
+    public PostInfoResponse updatePost(Long postId, Long userId, PostUpdateRequest postUpdateRequest) {
         Post post = getPost(postId);
+
+        if (!userId.equals(post.getAuthor().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author of this post can update it.");
+        }
+
         post.update(postUpdateRequest.title(), postUpdateRequest.content());
         return PostInfoResponse.from(post);
     }
 
     @Transactional
-    public void deletePost(Long postId) {
+    public void deletePost(Long postId, Long userId) {
         Post post = getPost(postId);
+
+        if (!userId.equals(post.getAuthor().getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author of this post can delete it.");
+        }
+
         post.delete();
     }
 

@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import xyz.firstlab.blog.entity.BaseEntity;
-import xyz.firstlab.blog.entity.post.Post;
+import xyz.firstlab.blog.entity.article.Article;
 import xyz.firstlab.blog.entity.user.User;
 
 @Entity
@@ -22,7 +22,7 @@ public class Comment extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(nullable = false, updatable = false)
-    private Post post;
+    private Article article;
 
     @ManyToOne
     @JoinColumn(nullable = false, updatable = false)

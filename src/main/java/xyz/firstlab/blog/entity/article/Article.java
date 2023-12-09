@@ -1,4 +1,4 @@
-package xyz.firstlab.blog.entity.post;
+package xyz.firstlab.blog.entity.article;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "posts")
+@Table(name = "articles")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Post extends BaseEntity {
+public class Article extends BaseEntity {
 
     @Id
     @GeneratedValue
@@ -37,11 +37,11 @@ public class Post extends BaseEntity {
     @JoinColumn(nullable = false, updatable = false)
     private User author;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "article")
     private List<Comment> comments = new ArrayList<>();
 
     @Builder
-    public Post(String title, String content, User author) {
+    public Article(String title, String content, User author) {
         this.title = title;
         this.content = content;
         this.author = author;

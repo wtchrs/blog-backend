@@ -1,6 +1,6 @@
 package xyz.firstlab.blog.dto;
 
-public record PostUpdateRequest(
+public record ArticleUpdateRequest(
         String title,
         String content
 ) {

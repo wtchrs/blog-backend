@@ -5,50 +5,50 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import xyz.firstlab.blog.dto.MessageResponse;
-import xyz.firstlab.blog.dto.PostCreateRequest;
-import xyz.firstlab.blog.dto.PostInfoResponse;
-import xyz.firstlab.blog.dto.PostUpdateRequest;
+import xyz.firstlab.blog.dto.ArticleCreateRequest;
+import xyz.firstlab.blog.dto.ArticleInfoResponse;
+import xyz.firstlab.blog.dto.ArticleUpdateRequest;
 import xyz.firstlab.blog.security.JpaUserDetails;
-import xyz.firstlab.blog.service.PostService;
+import xyz.firstlab.blog.service.ArticleService;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api/articles")
 @RequiredArgsConstructor
-public class PostController {
+public class ArticleController {
 
-    private final PostService postService;
+    private final ArticleService articleService;
 
     @PostMapping
-    public PostInfoResponse createPost(@RequestBody PostCreateRequest postCreateRequest) {
+    public ArticleInfoResponse createPost(@RequestBody ArticleCreateRequest articleCreateRequest) {
         SecurityContext context = SecurityContextHolder.getContext();
         JpaUserDetails principal = (JpaUserDetails) context.getAuthentication().getPrincipal();
         String username = principal.getUser().getUsername();
 
-        return postService.createPost(username, postCreateRequest);
+        return articleService.postArticle(username, articleCreateRequest);
     }
 
-    @GetMapping("/{postId}")
-    public PostInfoResponse readPost(@PathVariable("postId") Long postId) {
-        return postService.readPost(postId);
+    @GetMapping("/{articleId}")
+    public ArticleInfoResponse readPost(@PathVariable("articleId") Long articleId) {
+        return articleService.readArticle(articleId);
     }
 
-    @PutMapping("/{postId}")
-    public PostInfoResponse updatePost(
-            @PathVariable("postId") Long postId, @RequestBody PostUpdateRequest postUpdateRequest) {
+    @PutMapping("/{articleId}")
+    public ArticleInfoResponse updatePost(
+            @PathVariable("articleId") Long articleId, @RequestBody ArticleUpdateRequest articleUpdateRequest) {
         SecurityContext context = SecurityContextHolder.getContext();
         JpaUserDetails principal = (JpaUserDetails) context.getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
 
-        return postService.updatePost(postId, userId, postUpdateRequest);
+        return articleService.updateArticle(articleId, userId, articleUpdateRequest);
     }
 
-    @DeleteMapping("/{postId}")
-    public MessageResponse deletePost(@PathVariable("postId") Long postId) {
+    @DeleteMapping("/{articleId}")
+    public MessageResponse deletePost(@PathVariable("articleId") Long articleId) {
         SecurityContext context = SecurityContextHolder.getContext();
         JpaUserDetails principal = (JpaUserDetails) context.getAuthentication().getPrincipal();
         Long userId = principal.getUser().getId();
 
-        postService.deletePost(postId, userId);
+        articleService.deleteArticle(articleId, userId);
         return new MessageResponse("Post is successfully deleted.");
     }
 

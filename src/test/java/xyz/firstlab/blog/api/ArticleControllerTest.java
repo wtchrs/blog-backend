@@ -19,10 +19,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import xyz.firstlab.blog.dto.PostCreateRequest;
-import xyz.firstlab.blog.dto.PostUpdateRequest;
-import xyz.firstlab.blog.entity.post.Post;
-import xyz.firstlab.blog.entity.post.PostRepository;
+import xyz.firstlab.blog.dto.ArticleCreateRequest;
+import xyz.firstlab.blog.dto.ArticleUpdateRequest;
+import xyz.firstlab.blog.entity.article.Article;
+import xyz.firstlab.blog.entity.article.ArticleRepository;
 import xyz.firstlab.blog.entity.user.User;
 import xyz.firstlab.blog.entity.user.UserRepository;
 import xyz.firstlab.blog.security.JpaUserDetails;
@@ -41,13 +41,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @ExtendWith({RestDocumentationExtension.class, SpringExtension.class})
-class PostControllerTest {
+class ArticleControllerTest {
 
     @Autowired
     UserRepository userRepository;
 
     @Autowired
-    PostRepository postRepository;
+    ArticleRepository articleRepository;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -65,13 +65,13 @@ class PostControllerTest {
     @Test
     @Transactional
     void createPost() throws Exception {
-        PostCreateRequest postCreateRequest = new PostCreateRequest("test title", "This is content.");
+        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest("test title", "This is content.");
         User testUser = createTestUser();
         userRepository.save(testUser);
 
-        mockMvc.perform(post("/api/posts")
+        mockMvc.perform(post("/api/articles")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postCreateRequest))
+                        .content(objectMapper.writeValueAsString(articleCreateRequest))
                         .accept(MediaType.APPLICATION_JSON)
                         .with(csrf().asHeader())
                         .with(user(new JpaUserDetails(testUser)))
@@ -89,7 +89,7 @@ class PostControllerTest {
                         )
                 )
                 .andDo(document(
-                        "/api/posts - POST",
+                        "/api/articles - POST",
                         requestFields(
                                 fieldWithPath("title").type(JsonFieldType.STRING).description("title"),
                                 fieldWithPath("content").type(JsonFieldType.STRING).description("content")
@@ -102,18 +102,18 @@ class PostControllerTest {
     @Transactional
     void readPost() throws Exception {
         User testUser = createTestUser();
-        Post testPost = createTestPost(testUser);
+        Article testArticle = createTestPost(testUser);
         userRepository.save(testUser);
-        postRepository.save(testPost);
+        articleRepository.save(testArticle);
 
-        mockMvc.perform(get("/api/posts/{postId}", testPost.getId())
+        mockMvc.perform(get("/api/articles/{articleId}", testArticle.getId())
                         .accept(MediaType.APPLICATION_JSON)
                 )
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk()) // Response status is 200 OK
                 .andDo(document(
-                        "/api/posts/{postId} - GET",
-                        pathParameters(parameterWithName("postId").description("identity of the post to find")),
+                        "/api/articles/{articleId} - GET",
+                        pathParameters(parameterWithName("articleId").description("identity of the article to find")),
                         getPostInfoResponseFieldsSnippet()
                 ));
     }
@@ -122,15 +122,15 @@ class PostControllerTest {
     @Transactional
     void updatePost() throws Exception {
         User testUser = createTestUser();
-        Post testPost = createTestPost(testUser);
+        Article testArticle = createTestPost(testUser);
         userRepository.save(testUser);
-        postRepository.save(testPost);
+        articleRepository.save(testArticle);
 
-        PostUpdateRequest postUpdateRequest = new PostUpdateRequest("new title", "new content");
+        ArticleUpdateRequest articleUpdateRequest = new ArticleUpdateRequest("new title", "new content");
 
-        ResultActions resultActions = mockMvc.perform(put("/api/posts/{postId}", testPost.getId())
+        ResultActions resultActions = mockMvc.perform(put("/api/articles/{articleId}", testArticle.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(postUpdateRequest))
+                        .content(objectMapper.writeValueAsString(articleUpdateRequest))
                         .accept(MediaType.APPLICATION_JSON)
                         .with(csrf().asHeader())
                         .with(user(new JpaUserDetails(testUser)))
@@ -138,12 +138,12 @@ class PostControllerTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk()); // Response status is 200 OK
 
-        assertThat(testPost.getTitle()).isEqualTo(postUpdateRequest.title());
-        assertThat(testPost.getContent()).isEqualTo(postUpdateRequest.content());
+        assertThat(testArticle.getTitle()).isEqualTo(articleUpdateRequest.title());
+        assertThat(testArticle.getContent()).isEqualTo(articleUpdateRequest.content());
 
         resultActions.andDo(document(
-                "/api/posts/{postId} - PUT",
-                pathParameters(parameterWithName("postId").description("identity of the post to update")),
+                "/api/articles/{articleId} - PUT",
+                pathParameters(parameterWithName("articleId").description("identity of the article to update")),
                 getPostInfoResponseFieldsSnippet()
         ));
     }
@@ -152,11 +152,11 @@ class PostControllerTest {
     @Transactional
     void deletePost() throws Exception {
         User testUser = createTestUser();
-        Post testPost = createTestPost(testUser);
+        Article testArticle = createTestPost(testUser);
         userRepository.save(testUser);
-        postRepository.save(testPost);
+        articleRepository.save(testArticle);
 
-        ResultActions resultActions = mockMvc.perform(delete("/api/posts/{postId}", testPost.getId())
+        ResultActions resultActions = mockMvc.perform(delete("/api/articles/{articleId}", testArticle.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .with(csrf().asHeader())
                         .with(user(new JpaUserDetails(testUser)))
@@ -164,11 +164,11 @@ class PostControllerTest {
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(status().isOk()); // Response status is 200 OK
 
-        assertThat(testPost.isDeleted()).isTrue();
+        assertThat(testArticle.isDeleted()).isTrue();
 
         resultActions.andDo(document(
-                "/api/posts/{postId} - DELETE",
-                pathParameters(parameterWithName("postId").description("identity of the post to delete")),
+                "/api/articles/{articleId} - DELETE",
+                pathParameters(parameterWithName("articleId").description("identity of the article to delete")),
                 responseFields(fieldWithPath("message").type(JsonFieldType.STRING)
                         .description("A constant message of \\\"Post is successfully deleted.\\\""))
         ));
@@ -176,20 +176,20 @@ class PostControllerTest {
 
     private static ResponseFieldsSnippet getPostInfoResponseFieldsSnippet() {
         return responseFields(
-                fieldWithPath("postId").type(JsonFieldType.NUMBER).description("post id"),
+                fieldWithPath("articleId").type(JsonFieldType.NUMBER).description("article id"),
                 fieldWithPath("username").type(JsonFieldType.STRING).description("username of author"),
-                fieldWithPath("title").type(JsonFieldType.STRING).description("title of the post"),
-                fieldWithPath("content").type(JsonFieldType.STRING).description("content of the post"),
-                fieldWithPath("views").type(JsonFieldType.NUMBER).description("views of the post"),
+                fieldWithPath("title").type(JsonFieldType.STRING).description("title of the article"),
+                fieldWithPath("content").type(JsonFieldType.STRING).description("content of the article"),
+                fieldWithPath("views").type(JsonFieldType.NUMBER).description("views of the article"),
                 fieldWithPath("createdAt").type(JsonFieldType.STRING)
-                        .description("timestamp when the post was created"),
+                        .description("timestamp when the article was created"),
                 fieldWithPath("modifiedAt").type(JsonFieldType.STRING)
-                        .description("timestamp when the post was last modified ")
+                        .description("timestamp when the article was last modified ")
         );
     }
 
-    private static Post createTestPost(User user) {
-        return Post.builder()
+    private static Article createTestPost(User user) {
+        return Article.builder()
                 .title("test title")
                 .content("This is content.")
                 .author(user)

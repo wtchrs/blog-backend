@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import xyz.firstlab.blog.entity.BaseEntity;
 import xyz.firstlab.blog.entity.comment.Comment;
-import xyz.firstlab.blog.entity.post.Post;
+import xyz.firstlab.blog.entity.article.Article;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +49,7 @@ public class User extends BaseEntity {
     private List<Follow> followers = new ArrayList<>();
 
     @OneToMany(mappedBy = "author")
-    private List<Post> posts = new ArrayList<>();
+    private List<Article> articles = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     private List<Comment> comments = new ArrayList<>();

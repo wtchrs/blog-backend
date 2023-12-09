@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/sign-in").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/users/*").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/posts/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/articles/*").permitAll()
                 .anyRequest().authenticated()
         );
 

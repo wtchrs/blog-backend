@@ -39,10 +39,10 @@ class ArticleServiceTest {
     void postArticle_Success() {
         User testUser = createTestUser();
 
-        when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(testUser));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
         ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest("test title", "This is content.");
-        ArticleInfoResponse result = articleService.postArticle("testUser", articleCreateRequest);
+        ArticleInfoResponse result = articleService.postArticle(1L, articleCreateRequest);
 
         assertThat(result.title()).isEqualTo(articleCreateRequest.title());
         assertThat(result.content()).isEqualTo(articleCreateRequest.content());
@@ -56,7 +56,7 @@ class ArticleServiceTest {
     void postArticle_UserNotExists() {
         ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest("test title", "This is content.");
 
-        assertThatThrownBy(() -> articleService.postArticle("testUser", articleCreateRequest))
+        assertThatThrownBy(() -> articleService.postArticle(1L, articleCreateRequest))
                 .isExactlyInstanceOf(ResponseStatusException.class)
                 .hasFieldOrPropertyWithValue("status", HttpStatus.FORBIDDEN);
     }

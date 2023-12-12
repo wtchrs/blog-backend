@@ -22,9 +22,9 @@ public class ArticleController {
     public ArticleInfoResponse createPost(@RequestBody ArticleCreateRequest articleCreateRequest) {
         SecurityContext context = SecurityContextHolder.getContext();
         JpaUserDetails principal = (JpaUserDetails) context.getAuthentication().getPrincipal();
-        String username = principal.getUser().getUsername();
+        Long userId = principal.getUser().getId();
 
-        return articleService.postArticle(username, articleCreateRequest);
+        return articleService.postArticle(userId, articleCreateRequest);
     }
 
     @GetMapping("/{articleId}")

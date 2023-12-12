@@ -23,19 +23,24 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
 
+    // TODO: look up articles by author.
+    // TODO: look up articles in order by popularity.
+    // TODO: read an article with its comments.
+    // TODO: add tag, series.
+
     @Transactional
-    public ArticleInfoResponse postArticle(String username, ArticleCreateRequest articleCreateRequest) {
+    public ArticleInfoResponse postArticle(Long userId, ArticleCreateRequest articleCreateRequest) {
         // TODO: Instead of reading the entire entity,
         //  change it to only check whether it exists and whether it has been deleted.
 
-        Optional<User> optionalUser = userRepository.findByUsername(username);
+        Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User '" + username + "' is not exists.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not exists.");
         }
 
         User user = optionalUser.get();
         if (user.isDeleted()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User '" + username + "' is not exists.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not exists.");
         }
 
         Article article = articleCreateRequest.toArticle(user);
@@ -44,8 +49,8 @@ public class ArticleService {
     }
 
     @Transactional(readOnly = true)
-    public ArticleInfoResponse readArticle(Long postId) {
-        Article article = getArticle(postId);
+    public ArticleInfoResponse readArticle(Long articleId) {
+        Article article = getArticle(articleId);
         article.increaseViews();
         return ArticleInfoResponse.from(article);
     }
@@ -65,8 +70,8 @@ public class ArticleService {
     }
 
     @Transactional
-    public ArticleInfoResponse updateArticle(Long postId, Long userId, ArticleUpdateRequest articleUpdateRequest) {
-        Article article = getArticle(postId);
+    public ArticleInfoResponse updateArticle(Long articleId, Long userId, ArticleUpdateRequest articleUpdateRequest) {
+        Article article = getArticle(articleId);
 
         if (!userId.equals(article.getAuthor().getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author of this article can update it.");
@@ -77,8 +82,8 @@ public class ArticleService {
     }
 
     @Transactional
-    public void deleteArticle(Long postId, Long userId) {
-        Article article = getArticle(postId);
+    public void deleteArticle(Long articleId, Long userId) {
+        Article article = getArticle(articleId);
 
         if (!userId.equals(article.getAuthor().getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author of this article can delete it.");

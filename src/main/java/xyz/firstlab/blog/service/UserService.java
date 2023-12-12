@@ -23,6 +23,8 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    // TODO: look up users by username, name, blogName.
+
     @Transactional
     public UserInfoResponse signUp(SignUpRequest signUp) {
         if (!signUp.password().equals(signUp.passwordConfirmation())) {
